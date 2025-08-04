@@ -1,0 +1,78 @@
+/* static/style.css */
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  text-align: center;
+  padding: 50px;
+  background-color: #f6fff5;
+}
+
+input, button {
+  padding: 10px;
+  font-size: 16px;
+  margin-top: 10px;
+}
+
+#result {
+  margin-top: 20px;
+  background: #e6ffe6;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  display: inline-block;
+}
+// static/script.js
+
+function handleImageUpload(event) {
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const preview = document.getElementById('imagePreview');
+      preview.src = e.target.result;
+      preview.style.display = 'block';
+      document.getElementById('detectBtn').style.display = 'inline-block';
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+async function detectDisease() {
+  const fileInput = document.getElementById('fileInput');
+  const file = fileInput.files[0];
+  const resultDiv = document.getElementById('result');
+
+  if (!file) {
+    alert('Please upload an image first.');
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('image', file);
+
+  try {
+    const response = await fetch('/detect', {
+      method: 'POST',
+      body: formData
+    });
+
+    const data = await response.json();
+
+    if (data.error) {
+      resultDiv.innerHTML = `<p style="color:red">${data.error}</p>`;
+    } else {
+      resultDiv.innerHTML = `
+        <h3>🧬 Detection Result</h3>
+        <p><strong>Disease:</strong> ${data.disease}</p>
+        <p><strong>Confidence:</strong> ${(data.confidence * 100).toFixed(2)}%</p>
+      `;
+    }
+
+    resultDiv.style.display = 'block';
+
+  } catch (err) {
+    resultDiv.innerHTML = `<p style="color:red">Error: ${err.message}</p>`;
+    resultDiv.style.display = 'block';
+  }
+}
+
