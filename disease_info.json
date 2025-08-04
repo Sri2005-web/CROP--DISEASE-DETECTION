@@ -1,0 +1,22 @@
+{
+  "Late Blight": {
+    "description": "A serious disease affecting tomatoes and potatoes.",
+    "symptoms": "Dark brown spots on leaves with white fuzz underneath.",
+    "treatment": "Use copper fungicides, avoid overhead irrigation."
+  },
+  "Powdery Mildew": {
+    "description": "White powdery coating on leaves.",
+    "symptoms": "Yellowing, stunted growth.",
+    "treatment": "Apply sulfur-based fungicides, improve airflow."
+  },
+  "Bacterial Leaf Spot": {
+    "description": "Spots on leaves/fruits caused by bacteria.",
+    "symptoms": "Dark spots with yellow halos.",
+    "treatment": "Use copper bactericides, rotate crops."
+  },
+  "Rust Disease": {
+    "description": "Fungal rust forming orange pustules.",
+    "symptoms": "Orange/brown spots, leaf drop.",
+    "treatment": "Fungicide spray, destroy infected plants."
+  }
+}
