@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Prediction History - AgriGuardians</title>
+    <style>
+        body {
+            font-family: Arial;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #4CAF50;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 20px;
+            background: white;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        img {
+            width: 100px;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🌿 Prediction History</h1>
+
+    <table>
+        <tr>
+            <th>Date & Time</th>
+            <th>User</th>
+            <th>Disease</th>
+            <th>Confidence</th>
+            <th>Image</th>
+            <th>Description</th>
+            <th>Treatment</th>
+        </tr>
+
+        {% for row in records %}
+        <tr>
+            <td>{{ row['Timestamp'] }}</td>
+            <td>{{ row['User'] }}</td>
+            <td>{{ row['Disease'] }}</td>
+            <td>{{ "%.2f"|format(row['Confidence']) }}</td>
+            <td><img src="{{ url_for('static', filename='uploads/' + row['Image']) }}" alt="Image"></td>
+            <td>{{ row['Description'] }}</td>
+            <td>{{ row['Treatment'] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AgriGuardians for Smart India</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-image: url("/static/bg_farmer.jpg");
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      color: #fff;
+      text-align: center;
+      padding: 50px;
+    }
+
+    .colorful-title {
+      font-size: 42px;
+      font-weight: bold;
+      background: linear-gradient(90deg, #00c853, #ffd600, #ff6d00, #d500f9, #2196f3);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: rainbow 6s infinite linear;
+      text-shadow: 2px 2px 6px #000;
+      margin-bottom: 10px;
+    }
+
+    @keyframes rainbow {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 100% 50%; }
+    }
+
+    .tagline {
+      font-size: 20px;
+      color: #eeeeee;
+      margin-bottom: 30px;
+    }
+    <center>
+    input[type="file"], button {
+      padding: 12px 18px;
+      margin: 10px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+    }
+    </center>
+
+    button {
+      background-color: #28a745;
+      color: white;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #1e7e34;
+    }
+
+    #resultBox {
+      background: rgba(0, 0, 0, 0.65);
+      margin-top: 30px;
+      padding: 20px;
+      border-radius: 12px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      box-shadow: 0 0 10px #000;
+    }
+
+    video {
+      border: 2px solid #fff;
+      border-radius: 10px;
+      margin-top: 10px;
+    }
+
+    form.logout-form {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <img src="">
+  <!-- Logout Button -->
+  <form class="logout-form" action="/logout" method="GET">
+    <button type="submit">📤 Logout</button>
+  </form>
+
+  <!-- Title -->
+  <h2 class="colorful-title">🌾 Welcome to AgriGuardians for Smart India</h2>
+  <p class="tagline">AI-powered crop disease detection for farmers across the nation 🇮🇳</p>
+
+  <!-- Upload Image -->
+  <input type="file" id="imageInput" accept="image/*"><br>
+  <button id="detectBtn">🧬 Detect Disease</button>
+
+  <!-- Webcam -->
+  <h3>📸 OR Capture via Webcam</h3>
+  <video id="video" width="320" height="240" autoplay playsinline></video><br>
+  <button id="captureBtn">📷 Capture</button>
+
+  <!-- Hidden canvas -->
+  <canvas id="canvas" width="224" height="224" class="hidden"></canvas>
+
+  <!-- Result Box -->
+  <div id="resultBox">
+    <p>🧪 Result will appear here after upload or capture...</p>
+  </div>
+
+  <!-- Script -->
+  <script>
+    const imageInput = document.getElementById('imageInput');
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const captureBtn = document.getElementById('captureBtn');
+    const detectBtn = document.getElementById('detectBtn');
+
+    // Upload and Detect
+    detectBtn.addEventListener('click', () => {
+      const file = imageInput.files[0];
+      if (!file) {
+        alert("⚠️ Please choose an image first.");
+        return;
+      }
+      const formData = new FormData();
+      formData.append('image', file);
+      showResult("⏳ Analyzing uploaded image...");
+      sendToServer(formData);
+    });
+
+    // Webcam Access
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(stream => {
+        video.srcObject = stream;
+        console.log("🎥 Camera ready");
+      })
+      .catch(err => {
+        alert("❌ Unable to access camera");
+        console.error(err);
+      });
+
+    // Capture from Webcam
+    captureBtn.addEventListener('click', () => {
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob(blob => {
+        if (!blob) {
+          showResult("❌ Could not capture image. Try again.");
+          return;
+        }
+        const formData = new FormData();
+        formData.append('image', blob, 'webcam.jpg');
+        showResult("⏳ Analyzing captured image...");
+        sendToServer(formData);
+      }, 'image/jpeg');
+    });
+
+    // Send to backend
+    function sendToServer(formData) {
+      fetch('/detect', {
+        method: 'POST',
+        body: formData
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.disease === "Unknown" || data.confidence === 0.0) {
+            showResult("❌ Invalid image. Please upload a valid crop/leaf image.");
+          } else {
+            showResult(`
+              ✅ <strong>Disease:</strong> ${data.disease}<br>
+              🔬 <strong>Confidence:</strong> ${(data.confidence * 100).toFixed(2)}%<br>
+              😷 <strong>Symptoms:</strong> ${data.symptoms}<br>
+              💊 <strong>Treatment:</strong> ${data.treatment}
+            `);
+          }
+        })
+        .catch(err => {
+          console.error("Server error:", err);
+          showResult("⚠️ Server error. Please try again.");
+        });
+    }
+
+    function showResult(message) {
+      document.getElementById('resultBox').innerHTML = `<p>${message}</p>`;
+    }
+  </script>
+</body>
+</html>
